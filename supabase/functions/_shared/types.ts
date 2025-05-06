@@ -1,10 +1,8 @@
-export interface MoodArtRequest {
+export interface MoodReflectionRequest {
   mood: string;
-  additionalDetails?: string;
 }
 
-export interface MoodArtResponse {
-  artDescription: string;
-  generatedContent?: any;
+export interface MoodReflectionResponse {
+  reflection: string;
   error?: string;
 }

@@ -4,7 +4,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import { Card } from "./ui/card";
-import { Loader2, Download, Share2, Sparkles } from "lucide-react";
+import { Loader2, Download, Share2, Sparkles, BookOpen } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 const MOOD_OPTIONS = [
@@ -21,6 +21,9 @@ export default function MoodArtGenerator() {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [moodReflection, setMoodReflection] = useState<string>("");
+  const [isLoadingReflection, setIsLoadingReflection] = useState<boolean>(false);
+  const [reflectionError, setReflectionError] = useState<string | null>(null);
 
   const mood = selectedMood === "custom" ? customMood : selectedMood;
 
@@ -53,6 +56,34 @@ export default function MoodArtGenerator() {
       setError(err instanceof Error ? err.message : "Failed to generate art description");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGenerateReflection = async () => {
+    if (!mood) {
+      setReflectionError("No mood selected");
+      return;
+    }
+
+    setIsLoadingReflection(true);
+    setReflectionError(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('supabase-functions-generate-mood-reflection', {
+        body: { mood }
+      });
+
+      if (error) throw new Error(error.message);
+      
+      if (data.error) {
+        setReflectionError(data.error);
+      } else {
+        setMoodReflection(data.reflection);
+      }
+    } catch (err) {
+      setReflectionError(err instanceof Error ? err.message : "Failed to generate mood reflection");
+    } finally {
+      setIsLoadingReflection(false);
     }
   };
 
@@ -236,6 +267,48 @@ export default function MoodArtGenerator() {
                     alt={`Art representing ${mood}`} 
                     className="relative rounded-lg shadow-md max-h-96 object-contain"
                   />
+                </div>
+              </div>
+            )}
+
+            {/* Mood Reflection Section */}
+            {(artDescription || imageUrl) && !moodReflection && !isLoadingReflection && (
+              <div className="mt-8 flex flex-col items-center">
+                <p className="text-amber-900 text-center mb-4">
+                  Would you like a personal reflection based on your mood?
+                </p>
+                <Button
+                  onClick={handleGenerateReflection}
+                  className="bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-700 hover:to-orange-800 text-white py-2 px-6 rounded-full font-medium shadow-md transition-all duration-300 flex items-center"
+                >
+                  <BookOpen className="mr-2 h-5 w-5" />
+                  Get Mood Reflection
+                </Button>
+              </div>
+            )}
+
+            {isLoadingReflection && (
+              <div className="mt-6 flex flex-col items-center">
+                <Loader2 className="h-8 w-8 animate-spin text-amber-700" />
+                <p className="text-amber-900 mt-2">Generating your reflection...</p>
+              </div>
+            )}
+
+            {reflectionError && (
+              <div className="p-4 bg-red-100 border border-red-500 text-red-900 rounded-md font-medium mt-6">
+                {reflectionError}
+              </div>
+            )}
+
+            {moodReflection && (
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-amber-950 mb-3">
+                  Your Mood Reflection
+                </h3>
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-md border border-amber-400 shadow-inner">
+                  <p className="whitespace-pre-wrap text-amber-950 leading-relaxed italic">
+                    {moodReflection}
+                  </p>
                 </div>
               </div>
             )}
