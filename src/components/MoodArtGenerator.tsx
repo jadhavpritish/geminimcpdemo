@@ -4,7 +4,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import { Card } from "./ui/card";
-import { Loader2, Download, Share2 } from "lucide-react";
+import { Loader2, Download, Share2, Sparkles } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 const MOOD_OPTIONS = [
@@ -86,24 +86,16 @@ export default function MoodArtGenerator() {
   const imageUrl = getImageFromContent();
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-6 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-          Mood to Art
-        </h1>
-        <p className="text-lg text-gray-600">
-          Transform your emotions into unique artwork
-        </p>
-      </div>
-
-      <Card className="p-6 bg-gradient-to-br from-white to-purple-50 shadow-lg">
+    <div className="w-full max-w-3xl mx-auto space-y-8">
+      {/* Input Section */}
+      <Card className="p-6 backdrop-blur-md bg-white/90 border border-amber-400/50 shadow-xl rounded-xl overflow-hidden">
         <div className="space-y-6">
           <div>
-            <Label htmlFor="mood" className="text-lg font-medium">
+            <Label htmlFor="mood" className="text-xl font-semibold text-amber-950">
               How are you feeling today?
             </Label>
             
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               {MOOD_OPTIONS.map((option) => (
                 <Button
                   key={option}
@@ -113,7 +105,11 @@ export default function MoodArtGenerator() {
                     setSelectedMood(option);
                     setCustomMood("");
                   }}
-                  className="rounded-full"
+                  className={`rounded-full ${
+                    selectedMood === option 
+                      ? "bg-gradient-to-r from-amber-700 to-orange-800 text-white font-bold border-0 shadow-md" 
+                      : "bg-amber-100 text-amber-950 border border-amber-500 hover:bg-amber-200"
+                  }`}
                 >
                   {option}
                 </Button>
@@ -122,27 +118,31 @@ export default function MoodArtGenerator() {
                 type="button"
                 variant={selectedMood === "custom" ? "default" : "outline"}
                 onClick={() => setSelectedMood("custom")}
-                className="rounded-full"
+                className={`rounded-full ${
+                  selectedMood === "custom" 
+                    ? "bg-gradient-to-r from-amber-700 to-orange-800 text-white font-bold border-0 shadow-md" 
+                    : "bg-amber-100 text-amber-950 border border-amber-500 hover:bg-amber-200"
+                }`}
               >
                 Custom
               </Button>
             </div>
 
             {selectedMood === "custom" && (
-              <div className="mt-3">
+              <div className="mt-4">
                 <Input
                   id="customMood"
                   placeholder="Describe your mood..."
                   value={customMood}
                   onChange={(e) => setCustomMood(e.target.value)}
-                  className="w-full"
+                  className="w-full bg-amber-50 border-amber-400 text-amber-950 placeholder:text-amber-500 focus:ring-amber-600 focus:border-amber-600"
                 />
               </div>
             )}
           </div>
 
           <div>
-            <Label htmlFor="details" className="text-lg font-medium">
+            <Label htmlFor="details" className="text-xl font-semibold text-amber-950">
               Additional details (optional)
             </Label>
             <Textarea
@@ -150,13 +150,13 @@ export default function MoodArtGenerator() {
               placeholder="Add context or specific elements you'd like to see..."
               value={additionalDetails}
               onChange={(e) => setAdditionalDetails(e.target.value)}
-              className="mt-2 w-full"
+              className="mt-2 w-full bg-amber-50 border-amber-400 text-amber-950 placeholder:text-amber-500 focus:ring-amber-600 focus:border-amber-600"
               rows={3}
             />
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
+            <div className="p-4 bg-red-100 border border-red-500 text-red-900 rounded-md font-medium">
               {error}
             </div>
           )}
@@ -164,25 +164,29 @@ export default function MoodArtGenerator() {
           <Button
             onClick={handleGenerateArt}
             disabled={isLoading || !mood}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white py-2"
+            className="w-full bg-gradient-to-r from-amber-700 to-orange-800 hover:from-amber-800 hover:to-orange-900 text-white py-4 rounded-xl font-bold text-lg shadow-md transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                 Generating...
               </>
             ) : (
-              "Generate Mood Art"
+              <>
+                <Sparkles className="mr-2 h-6 w-6" />
+                Generate Mood Art
+              </>
             )}
           </Button>
         </div>
       </Card>
 
+      {/* Results Section - Rearranged to show text before image */}
       {(artDescription || imageUrl) && (
-        <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg">
+        <Card className="p-6 backdrop-blur-md bg-white/90 border border-amber-400/50 shadow-xl rounded-xl overflow-hidden">
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h2 className="text-2xl font-bold text-amber-950">
                 Your Mood Art
               </h2>
               <div className="flex gap-2">
@@ -191,6 +195,7 @@ export default function MoodArtGenerator() {
                   size="icon"
                   onClick={() => navigator.clipboard.writeText(artDescription)}
                   title="Copy description to clipboard"
+                  className="bg-amber-100 text-amber-950 border border-amber-500 hover:bg-amber-200"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -199,34 +204,40 @@ export default function MoodArtGenerator() {
                   size="icon"
                   onClick={handleShare}
                   title="Share"
+                  className="bg-amber-100 text-amber-950 border border-amber-500 hover:bg-amber-200"
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
             
-            {imageUrl && (
-              <div className="flex justify-center">
-                <img 
-                  src={imageUrl} 
-                  alt={`Art representing ${mood}`} 
-                  className="rounded-lg shadow-md max-h-96 object-contain"
-                />
-              </div>
-            )}
-            
+            {/* Text description now comes before the image */}
             {artDescription && (
-              <div className="bg-white p-4 rounded-md border border-gray-200 shadow-inner">
-                <p className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+              <div className="bg-amber-50 p-5 rounded-md border border-amber-400 shadow-inner">
+                <p className="whitespace-pre-wrap text-amber-950 leading-relaxed">
                   {artDescription}
                 </p>
               </div>
             )}
             
             {!imageUrl && artDescription && (
-              <p className="text-sm text-gray-500 italic">
+              <p className="text-sm text-amber-800 italic mt-3 font-medium">
                 Use this description with your favorite image generation tool to create your artwork.
               </p>
+            )}
+            
+            {/* Image now comes after the text */}
+            {imageUrl && (
+              <div className="flex justify-center mt-6">
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 to-orange-700 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                  <img 
+                    src={imageUrl} 
+                    alt={`Art representing ${mood}`} 
+                    className="relative rounded-lg shadow-md max-h-96 object-contain"
+                  />
+                </div>
+              </div>
             )}
           </div>
         </Card>
